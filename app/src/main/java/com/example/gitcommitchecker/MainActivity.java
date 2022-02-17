@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // TODO: Internet Permission 을 얻기 위해 권한 요청을 추가 해야 한다
         TextView textView = findViewById(R.id.text1);
         Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
