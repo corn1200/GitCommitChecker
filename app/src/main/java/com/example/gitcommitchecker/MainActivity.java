@@ -1,6 +1,7 @@
 package com.example.gitcommitchecker;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{"android.permission.INTERNET"}, 0);
 
         // TODO: Internet Permission 을 얻기 위해 권한 요청을 추가 해야 한다
         TextView textView = findViewById(R.id.text1);
