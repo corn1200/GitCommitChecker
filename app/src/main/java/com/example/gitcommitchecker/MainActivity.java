@@ -1,15 +1,17 @@
 package com.example.gitcommitchecker;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import java.util.concurrent.ExecutionException;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,32 +20,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{"android.permission.INTERNET"}, 0);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        // TODO: Internet Permission 을 얻기 위해 권한 요청을 추가 해야 한다
-        TextView textView = findViewById(R.id.text1);
-        Button button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String resultText = "[NULL]";
+        RetrofitAPI retrofitAPI = retrofit.create(RetrofitAPI.class);
 
-                Log.i("qwer", resultText);
+        retrofitAPI.listRepos("corn1200", "pushed", 1)
+                .enqueue(new Callback<List<Repo>>() {
+                    @Override
+                    public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
+                        if (response.isSuccessful()) {
+                            List<Repo> data = response.body();
+                            Log.d("Request", "request 성공");
+                            Log.i("response", data.get(0).getPushedAt());
+                        }
+                    }
 
-                try {
-                    resultText = new Task().execute().get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
+                    @Override
+                    public void onFailure(Call<List<Repo>> call, Throwable t) {
+                        Log.d("Request", "request 실패");
 
-                Log.i("qwer", resultText);
-
-                textView.setText(resultText);
-            }
-        });
-
+                        t.printStackTrace();
+                    }
+                });
     }
 }
