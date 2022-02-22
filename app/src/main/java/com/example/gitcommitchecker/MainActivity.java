@@ -11,7 +11,8 @@ import java.util.List;
 
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.observers.DisposableObserver;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,23 +36,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         button.setOnClickListener(view -> {
-            observable.subscribe(observer);
+            observable.subscribe(gitHubAPIObserver);
         });
     }
 
-    DisposableObserver<Void> observer = new DisposableObserver<Void>() {
-        @Override
-        public void onNext(@NonNull Void unused) {
-            Log.d(Thread.currentThread().getName(), "onNext()를 호출할 필요가 없습니다");
-        }
+    Observer<Void> gitHubAPIObserver = new Observer<Void>() {
+        String lastPushDate = "Nothing Pushed";
 
         @Override
-        public void onError(@NonNull Throwable e) {
-            Log.d(Thread.currentThread().getName(), "푸쉬 기록 호출 Observer Error");
-        }
-
-        @Override
-        public void onComplete() {
+        public void onSubscribe(@NonNull Disposable d) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://api.github.com/")
                     .addConverterFactory(GsonConverterFactory.create())
@@ -66,10 +59,11 @@ public class MainActivity extends AppCompatActivity {
                                                Response<List<Repo>> response) {
                             if (response.isSuccessful()) {
                                 List<Repo> data = response.body();
-                                Log.d("Request", "request 성공");
-                                Log.i("response", data.get(0).getPushedAt());
+                                lastPushDate = data.get(0).getPushedAt();
 
-                                textView.setText(data.get(0).getPushedAt());
+                                Log.i("response", lastPushDate);
+
+                                textView.setText(lastPushDate);
                             }
                         }
 
@@ -80,6 +74,21 @@ public class MainActivity extends AppCompatActivity {
                             t.printStackTrace();
                         }
                     });
+        }
+
+        @Override
+        public void onNext(@NonNull Void unused) {
+            Log.d(Thread.currentThread().getName(), "onNext()를 호출할 필요가 없습니다");
+        }
+
+        @Override
+        public void onError(@NonNull Throwable e) {
+            Log.d(Thread.currentThread().getName(), "푸쉬 기록 호출 Observer Error");
+        }
+
+        @Override
+        public void onComplete() {
+            Log.d("Request", "request 성공");
         }
     };
 }
