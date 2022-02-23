@@ -7,7 +7,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
@@ -41,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     Observer<Void> gitHubAPIObserver = new Observer<Void>() {
-        String lastPushDate = "Nothing Pushed";
+        String lastPushDate = "This User Nothing Pushed";
 
         @Override
         public void onSubscribe(@NonNull Disposable d) {
@@ -61,9 +65,24 @@ public class MainActivity extends AppCompatActivity {
                                 List<Repo> data = response.body();
                                 lastPushDate = data.get(0).getPushedAt();
 
-                                Log.i("response", lastPushDate);
+                                SimpleDateFormat dateFormat =
+                                        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                Date date = null;
+                                try {
+                                    date = dateFormat.parse(lastPushDate);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
 
-                                textView.setText(lastPushDate);
+                                Log.i("response", date.toString());
+
+                                textView.setText(date.toString());
+                                Log.i("this date", new Date().toString());
+
+                                SimpleDateFormat compDayFormat = new SimpleDateFormat("yyyyMMdd");
+                                Log.i("date compare", String.valueOf(compDayFormat.format(date)
+                                        .compareTo(compDayFormat.format(new Date()))));
                             }
                         }
 
