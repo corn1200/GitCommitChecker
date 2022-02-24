@@ -32,42 +32,54 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        상호작용할 뷰를 바인딩합니다
         textView = findViewById(R.id.text1);
         button = findViewById(R.id.button);
 
+//        객체를 구독하는 옵저버에 동작을 전달합니다
         Observable<Void> observable = Observable.create(subscriber -> {
             subscriber.onComplete();
         });
 
+//        리퀘스트 버튼 클릭 시 옵저버가 옵저베이블 객체를 구독하도록 합니다
         button.setOnClickListener(view -> {
             observable.subscribe(gitHubAPIObserver);
         });
     }
 
+    //    옵저버가 실행할 동작을 정의합니다
     Observer<Void> gitHubAPIObserver = new Observer<Void>() {
         String lastPushDate = "This User Nothing Pushed";
 
         @Override
         public void onSubscribe(@NonNull Disposable d) {
+//            리퀘스트를 보낼 주소와 retrofit 객체를 설정합니다
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://api.github.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
+//            API 인터페이스 객체를 생성합니다
             RetrofitAPI retrofitAPI = retrofit.create(RetrofitAPI.class);
 
+//            API 의 URI 값과 get 쿼리 값을 전달하고 리퀘스트합니다
             retrofitAPI.listRepos("corn1200", "pushed", 1)
                     .enqueue(new Callback<List<Repo>>() {
                         @Override
                         public void onResponse(Call<List<Repo>> call,
                                                Response<List<Repo>> response) {
+//                            리퀘스트가 정상적으로 동작하여 결과값이 있으면 아래 작업을 실행합니다
                             if (response.isSuccessful()) {
+//                                Json 데이터를 리스트로 만들고 유저의 마지막 커밋의 날짜 정보를 저장합니다
                                 List<Repo> data = response.body();
                                 lastPushDate = data.get(0).getPushedAt();
 
+//                                날짜 정보의 포맷을 설정하고 해당 날짜 정보의 시간대를 입력합니다
                                 SimpleDateFormat dateFormat =
                                         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+//                                String 날짜 정보를 Date 객체로 파싱합니다
                                 Date date = null;
                                 try {
                                     date = dateFormat.parse(lastPushDate);
@@ -77,10 +89,13 @@ public class MainActivity extends AppCompatActivity {
 
                                 Log.i("response", date.toString());
 
+//                                마지막 커밋 날짜를 뷰에 출력합니다
                                 textView.setText(date.toString());
                                 Log.i("this date", new Date().toString());
 
-                                SimpleDateFormat compDayFormat = new SimpleDateFormat("yyyyMMdd");
+//                                마지막 커밋 날짜와 현재 날짜를 같은 날짜인지 비교합니다
+                                SimpleDateFormat compDayFormat =
+                                        new SimpleDateFormat("yyyyMMdd");
                                 Log.i("date compare", String.valueOf(compDayFormat.format(date)
                                         .compareTo(compDayFormat.format(new Date()))));
                             }
