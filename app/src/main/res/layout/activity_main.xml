@@ -20,7 +20,7 @@
             android:layout_height="match_parent">
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/requestButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="request"
@@ -29,13 +29,23 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/text1"
+                android:id="@+id/lastCommitDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="empty"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button" />
+                app:layout_constraintTop_toBottomOf="@+id/requestButton" />
+
+            <Switch
+                android:id="@+id/commitAlarmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Use Commit Alarm?"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lastCommitDate" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
