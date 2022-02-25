@@ -1,5 +1,9 @@
 package com.example.gitcommitchecker;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -9,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -33,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        상호작용할 뷰를 바인딩합니다
-        textView = findViewById(R.id.text1);
-        button = findViewById(R.id.button);
+        textView = findViewById(R.id.lastCommitDate);
+        button = findViewById(R.id.requestButton);
 
 //        객체를 구독하는 옵저버에 동작을 전달합니다
         Observable<Void> observable = Observable.create(subscriber -> {
@@ -45,6 +50,22 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(view -> {
             observable.subscribe(gitHubAPIObserver);
         });
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast
+                (this, 5, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 11);
+        calendar.set(Calendar.MINUTE, 12);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(), alarmIntent);
     }
 
     //    옵저버가 실행할 동작을 정의합니다
