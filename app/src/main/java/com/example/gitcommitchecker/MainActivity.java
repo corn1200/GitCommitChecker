@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,6 +33,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
     TextView textView;
     Button button;
+    TimePicker timePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 //        상호작용할 뷰를 바인딩합니다
         textView = findViewById(R.id.lastCommitDate);
         button = findViewById(R.id.requestButton);
+        timePicker = findViewById(R.id.timePicker);
 
 //        객체를 구독하는 옵저버에 동작을 전달합니다
         Observable<Void> observable = Observable.create(subscriber -> {
@@ -51,21 +55,29 @@ public class MainActivity extends AppCompatActivity {
             observable.subscribe(gitHubAPIObserver);
         });
 
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        timePicker.setHour(0);
+        timePicker.setMinute(0);
 
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast
-                (this, 5, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        timePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> {
+            String commitAlarmMsg = hourOfDay + ":" + minute + " to commit alarm";
+            Toast.makeText(this, commitAlarmMsg, Toast.LENGTH_SHORT).show();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 11);
-        calendar.set(Calendar.MINUTE, 12);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), alarmIntent);
+            Intent intent = new Intent(this, AlarmReceiver.class);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast
+                    (this, 5, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            calendar.set(Calendar.MINUTE, minute);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    calendar.getTimeInMillis(), alarmIntent);
+        });
     }
 
     //    옵저버가 실행할 동작을 정의합니다
