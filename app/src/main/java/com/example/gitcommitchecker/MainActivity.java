@@ -32,9 +32,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     int alarmRequestCode = 1;
+    int hourOfDay;
+    int minute;
+
     TextView textView;
     Button button;
     TimePicker timePicker;
+    Button setAlarmButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.lastCommitDate);
         button = findViewById(R.id.requestButton);
         timePicker = findViewById(R.id.timePicker);
+        setAlarmButton = findViewById(R.id.setAlarmButton);
 
 //        객체를 구독하는 옵저버에 동작을 전달합니다
         Observable<Void> observable = Observable.create(subscriber -> {
@@ -60,6 +65,12 @@ public class MainActivity extends AppCompatActivity {
         timePicker.setMinute(0);
 
         timePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> {
+            this.hourOfDay = hourOfDay;
+            this.minute = minute;
+            setAlarmButton.setEnabled(true);
+        });
+
+        setAlarmButton.setOnClickListener(v -> {
             String commitAlarmMsg = hourOfDay + ":" + minute + " to commit alarm";
             Toast.makeText(this, commitAlarmMsg, Toast.LENGTH_SHORT).show();
 
