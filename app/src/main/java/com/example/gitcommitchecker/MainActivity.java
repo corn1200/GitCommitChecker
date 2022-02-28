@@ -31,6 +31,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+    int alarmRequestCode = 1;
     TextView textView;
     Button button;
     TimePicker timePicker;
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, AlarmReceiver.class);
             PendingIntent alarmIntent = PendingIntent.getBroadcast
-                    (this, 5, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    (this, alarmRequestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
