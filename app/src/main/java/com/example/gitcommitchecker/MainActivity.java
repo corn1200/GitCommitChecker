@@ -33,8 +33,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     int alarmRequestCode = 1;
-    int hourOfDay;
-    int minute;
+    int alarmHourOfDay;
+    int alarmMinute;
+    int pickerHourOfDay;
+    int pickerMinute;
 
     TextView textView;
     Button button;
@@ -49,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
-        hourOfDay = sharedPreferences.getInt(getString(R.string.alarm_hour), 0);
-        minute = sharedPreferences.getInt(getString(R.string.alarm_minute), 0);
+        alarmHourOfDay = sharedPreferences.getInt(getString(R.string.alarm_hour), 0);
+        alarmMinute = sharedPreferences.getInt(getString(R.string.alarm_minute), 0);
 
 //        상호작용할 뷰를 바인딩합니다
         textView = findViewById(R.id.lastCommitDate);
@@ -68,22 +70,29 @@ public class MainActivity extends AppCompatActivity {
             observable.subscribe(gitHubAPIObserver);
         });
 
-        timePicker.setHour(hourOfDay);
-        timePicker.setMinute(minute);
+        timePicker.setHour(alarmHourOfDay);
+        timePicker.setMinute(alarmMinute);
 
         timePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> {
-            this.hourOfDay = hourOfDay;
-            this.minute = minute;
-            setAlarmButton.setEnabled(true);
+            if (alarmHourOfDay == hourOfDay && alarmMinute == minute) {
+                setAlarmButton.setEnabled(false);
+            } else {
+                setAlarmButton.setEnabled(true);
+            }
+            pickerHourOfDay = hourOfDay;
+            pickerMinute = minute;
         });
 
         setAlarmButton.setOnClickListener(v -> {
+            alarmHourOfDay = pickerHourOfDay;
+            alarmMinute = pickerMinute;
+
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(getString(R.string.alarm_hour), hourOfDay);
-            editor.putInt(getString(R.string.alarm_minute), minute);
+            editor.putInt(getString(R.string.alarm_hour), alarmHourOfDay);
+            editor.putInt(getString(R.string.alarm_minute), alarmMinute);
             editor.apply();
 
-            String commitAlarmMsg = hourOfDay + ":" + minute + " to commit alarm";
+            String commitAlarmMsg = alarmHourOfDay + ":" + alarmMinute + " to commit alarm";
             Toast.makeText(this, commitAlarmMsg, Toast.LENGTH_SHORT).show();
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -94,13 +103,15 @@ public class MainActivity extends AppCompatActivity {
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            calendar.set(Calendar.MINUTE, minute);
+            calendar.set(Calendar.HOUR_OF_DAY, alarmHourOfDay);
+            calendar.set(Calendar.MINUTE, alarmMinute);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
 
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
                     calendar.getTimeInMillis(), alarmIntent);
+
+            setAlarmButton.setEnabled(false);
         });
     }
 
