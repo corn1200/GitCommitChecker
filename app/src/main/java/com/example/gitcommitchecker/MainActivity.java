@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -39,11 +40,17 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     TimePicker timePicker;
     Button setAlarmButton;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+
+        hourOfDay = sharedPreferences.getInt(getString(R.string.alarm_hour), 0);
+        minute = sharedPreferences.getInt(getString(R.string.alarm_minute), 0);
 
 //        상호작용할 뷰를 바인딩합니다
         textView = findViewById(R.id.lastCommitDate);
@@ -61,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
             observable.subscribe(gitHubAPIObserver);
         });
 
-        timePicker.setHour(0);
-        timePicker.setMinute(0);
+        timePicker.setHour(hourOfDay);
+        timePicker.setMinute(minute);
 
         timePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> {
             this.hourOfDay = hourOfDay;
@@ -71,6 +78,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         setAlarmButton.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(getString(R.string.alarm_hour), hourOfDay);
+            editor.putInt(getString(R.string.alarm_minute), minute);
+            editor.apply();
+
             String commitAlarmMsg = hourOfDay + ":" + minute + " to commit alarm";
             Toast.makeText(this, commitAlarmMsg, Toast.LENGTH_SHORT).show();
 
