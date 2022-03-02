@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GitCommitChecker</string>
+    <string name="alarm_hour">alarm_hour_of_day</string>
+    <string name="alarm_minute">alarm_minute</string>
 </resources>
