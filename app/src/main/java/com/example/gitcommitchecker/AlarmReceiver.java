@@ -26,19 +26,15 @@ public class AlarmReceiver extends BroadcastReceiver {
                         PowerManager.ACQUIRE_CAUSES_WAKEUP |
                         PowerManager.ON_AFTER_RELEASE, "app:alarm");
 
-        cpuWakeLock.acquire();
+        cpuWakeLock.acquire(10*60*1000L /*10 minutes*/);
 
         Toast.makeText(context, "qwerqwre", Toast.LENGTH_SHORT).show();
         Log.d("qwer", "Alarm On");
 
-        if (wifiLock != null) {
-            wifiLock.release();
-            wifiLock = null;
-        }
+        wifiLock.release();
+        wifiLock = null;
 
-        if (cpuWakeLock != null) {
-            cpuWakeLock.release();
-            cpuWakeLock = null;
-        }
+        cpuWakeLock.release();
+        cpuWakeLock = null;
     }
 }
